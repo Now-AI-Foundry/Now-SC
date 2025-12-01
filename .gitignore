@@ -1,5 +1,46 @@
+# Node.js (legacy)
 node_modules/
+
+# Go
+bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+go.work
+
+# Environment files
 .env
+.env.local
+.env.*.local
+
+# OS files
 .DS_Store
-*.log
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Test projects
 test-project/
+*-test-project/
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/

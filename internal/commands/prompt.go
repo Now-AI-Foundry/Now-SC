@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Now-AI-Foundry/Now-SC/internal/claude"
 	"github.com/Now-AI-Foundry/Now-SC/internal/openrouter"
 	"github.com/fatih/color"
 	"github.com/manifoldco/promptui"
@@ -15,20 +16,46 @@ import (
 
 var promptCmd = &cobra.Command{
 	Use:   "prompt",
-	Short: "Execute a prompt template",
-	Long: `Execute a prompt template using OpenRouter API.
-Requires OPENROUTER_API_KEY environment variable to be set.`,
+	Short: "Work with prompt templates",
+	Long: `Execute prompt templates interactively or via direct commands.
+Supports Claude Code integration and OpenRouter API.
+
+Subcommands:
+  list - List all available prompts
+  run  - Execute a specific prompt by name
+
+Interactive mode (default):
+  now-sc prompt
+
+Direct execution:
+  now-sc prompt run <name>
+  cat file.txt | now-sc prompt run <name>`,
 	RunE: runPrompt,
 }
 
+func init() {
+	// Add subcommands
+	promptCmd.AddCommand(promptListCmd)
+	promptCmd.AddCommand(promptRunCmd)
+}
+
 func runPrompt(cmd *cobra.Command, args []string) error {
-	// Check for API key
+	// Check for Claude Code or API key
 	apiKey := os.Getenv("OPENROUTER_API_KEY")
-	if apiKey == "" {
-		color.Red("Error: OPENROUTER_API_KEY environment variable is not set")
-		color.Yellow("Please set your OpenRouter API key:")
-		fmt.Println("  export OPENROUTER_API_KEY=your_api_key_here")
-		return fmt.Errorf("OPENROUTER_API_KEY not set")
+	hasClaudeCode := claude.IsAvailable()
+
+	if apiKey == "" && !hasClaudeCode {
+		color.Red("Error: No AI provider available")
+		color.Yellow("Please either:")
+		fmt.Println("  1. Install Claude Code: https://claude.ai/download")
+		fmt.Println("  2. Set OPENROUTER_API_KEY environment variable")
+		return fmt.Errorf("no AI provider configured")
+	}
+
+	// Determine which provider to use
+	useClaudeCode := hasClaudeCode
+	if apiKey != "" && !hasClaudeCode {
+		useClaudeCode = false
 	}
 
 	// Find prompt templates directory
@@ -104,10 +131,21 @@ func runPrompt(cmd *cobra.Command, args []string) error {
 	fmt.Println(color.CyanString("Executing prompt..."))
 
 	// Execute prompt
-	client := openrouter.NewClient(apiKey)
-	result, err := client.ExecutePrompt(string(promptContent), userInput)
-	if err != nil {
-		return fmt.Errorf("failed to execute prompt: %w", err)
+	var result string
+	if useClaudeCode {
+		color.Cyan("Using Claude Code...")
+		claudeClient := claude.NewClient()
+		result, err = claudeClient.ExecutePrompt(string(promptContent), userInput)
+		if err != nil {
+			return fmt.Errorf("failed to execute prompt with Claude Code: %w", err)
+		}
+	} else {
+		color.Cyan("Using OpenRouter...")
+		client := openrouter.NewClient(apiKey)
+		result, err = client.ExecutePrompt(string(promptContent), userInput)
+		if err != nil {
+			return fmt.Errorf("failed to execute prompt with OpenRouter: %w", err)
+		}
 	}
 
 	color.Green("✓ Prompt executed successfully!\n")

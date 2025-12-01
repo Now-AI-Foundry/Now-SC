@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git remote set-url:*)",
+      "mcp__github__create_branch",
+      "Bash(git fetch:*)",
+      "Bash(git checkout:*)",
+      "Bash(go mod init:*)",
+      "Bash(mkdir:*)",
+      "Bash(go get:*)",
+      "Bash(make build:*)",
+      "Bash(go build:*)",
+      "Bash(./bin/now-sc.exe:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "mcp__github__push_files",
+      "Bash(gh pr create:*)",
+      "mcp__github__create_pull_request",
+      "Bash(git pull:*)",
+      "Bash(git merge:*)",
+      "Bash(make build-all:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

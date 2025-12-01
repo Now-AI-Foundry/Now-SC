@@ -1,136 +1,172 @@
 # Now-SC CLI Tool
 
-A command-line tool for bootstrapping presales projects for solution consultants using Cline/Cursor.
+A CLI tool for bootstrapping presales projects for solution consultants, written in Go for easy binary distribution.
+
+## Features
+
+- 🚀 Single binary distribution (no runtime dependencies)
+- 📁 Automated project structure creation
+- 🤖 AI-powered prompt execution via OpenRouter
+- 🐙 GitHub repository integration
+- 💾 Cross-platform support (Linux, macOS, Windows)
 
 ## Installation
 
-### From Source (Recommended)
-1. Clone or download this repository
-2. Navigate to the project directory
-3. Install dependencies and link globally:
+### From Binary Release
+
+Download the latest binary for your platform from the [releases page](https://github.com/Now-AI-Foundry/Now-SC/releases):
+
+**Linux (AMD64)**:
 ```bash
-npm install
-npm link
+curl -LO https://github.com/Now-AI-Foundry/Now-SC/releases/latest/download/now-sc-linux-amd64
+chmod +x now-sc-linux-amd64
+sudo mv now-sc-linux-amd64 /usr/local/bin/now-sc
 ```
 
-Now you can use `now-sc` command globally.
-
-### Local Development
+**macOS (Intel)**:
 ```bash
-npm install
-node index.js
+curl -LO https://github.com/Now-AI-Foundry/Now-SC/releases/latest/download/now-sc-darwin-amd64
+chmod +x now-sc-darwin-amd64
+sudo mv now-sc-darwin-amd64 /usr/local/bin/now-sc
 ```
 
-### Uninstall
-To remove the global installation:
+**macOS (Apple Silicon)**:
 ```bash
-npm unlink -g now-sc
+curl -LO https://github.com/Now-AI-Foundry/Now-SC/releases/latest/download/now-sc-darwin-arm64
+chmod +x now-sc-darwin-arm64
+sudo mv now-sc-darwin-arm64 /usr/local/bin/now-sc
+```
+
+**Windows**:
+Download `now-sc-windows-amd64.exe` from the releases page and add it to your PATH.
+
+### From Source
+
+Requires Go 1.21 or later:
+
+```bash
+git clone https://github.com/Now-AI-Foundry/Now-SC.git
+cd Now-SC
+make build
+# Binary will be in bin/now-sc
 ```
 
 ## Usage
 
 ### Initialize a New Project
+
 ```bash
 now-sc init
 ```
 
-Or with options:
+With flags:
 ```bash
 now-sc init --name my-project --customer "Acme Corp"
 ```
 
-Skip GitHub repository creation:
+Skip GitHub repo creation:
 ```bash
 now-sc init --no-github
 ```
 
 ### Execute Prompts
+
 Navigate to your project directory and run:
 ```bash
+cd my-project
 now-sc prompt
-```
-
-## Features
-
-- **Project Scaffolding**: Creates a structured directory layout for presales projects
-- **Customer Management**: Dedicated folders for each customer
-- **Prompt Templates**: Automatically fetches and includes base prompts from GitHub
-- **LLM Integration**: Execute prompts using OpenRouter API with Gemini 2.5
-- **Output Management**: Save LLM responses to appropriate project folders
-- **GitHub Integration**: Automatically creates empty private GitHub repositories for each project
-
-## Directory Structure
-
-```
-project-name/
-├── 00_Inbox/                    # Raw meeting notes and transcripts
-│   ├── calls/
-│   │   ├── internal/           # Internal call recordings and notes
-│   │   └── external/           # External call recordings and notes
-│   ├── emails/                 # Email communications
-│   └── notes/                  # General notes
-├── 01_Customers/
-│   └── [Customer Name]/        # Customer-specific information
-├── 10_PromptTemplates/         # Ready-to-use prompt templates
-├── 20_Demo_Library/            # Demo materials and resources
-└── 99_Assets/                  # Processed and synthesized outputs
-    ├── Project_Overview/       # High-level project summaries
-    ├── Communications/         # Prepared communications
-    └── POC_Documents/         # Proof of concept documentation
 ```
 
 ## Configuration
 
 ### Environment Variables
 
-#### OpenRouter API Key (Required for prompt execution)
+- `OPENROUTER_API_KEY` - Required for prompt execution. Get your key from [OpenRouter](https://openrouter.ai/)
+- `GITHUB_PAT` - Optional. Required for automatic GitHub repository creation
+
+Example `.env` file:
 ```bash
-export OPENROUTER_API_KEY=your_api_key_here
+OPENROUTER_API_KEY=your_openrouter_api_key
+GITHUB_PAT=your_github_personal_access_token
 ```
 
-Get your API key from [OpenRouter](https://openrouter.ai/).
+## Project Structure
 
-#### GitHub Personal Access Token (Optional for automatic repo creation)
-```bash
-export GITHUB_PAT=your_github_token_here
+When you initialize a project, the following structure is created:
+
 ```
-
-To create a GitHub PAT:
-1. Go to GitHub Settings > Developer settings > Personal access tokens
-2. Generate a new token with `repo` scope
-3. Copy and set as environment variable
-
-When a project is created with GitHub integration:
-- An empty private repository is created on GitHub
-- Git is initialized locally with the remote origin set
-- No files are committed or pushed automatically
-- You have full control over what and when to commit
-
-### Using .env File
-You can also create a `.env` file in your project directory:
+project-name/
+├── 00_Inbox/
+│   ├── calls/
+│   │   ├── internal/
+│   │   └── external/
+│   ├── emails/
+│   └── notes/
+├── 01_Customers/
+│   └── [CustomerName]/
+├── 10_PromptTemplates/
+├── 20_Demo_Library/
+├── 30_CommunicationTemplates/
+├── 99_Assets/
+│   ├── Project_Overview/
+│   ├── Communications/
+│   └── POC_Documents/
+├── README.md
+├── .env.example
+└── .gitignore
 ```
-OPENROUTER_API_KEY=your_api_key_here
-GITHUB_PAT=your_github_token_here
-```
-
-## Prompt Templates
-
-The tool automatically fetches prompt templates from the [Now-SC-Base-Prompts](https://github.com/michaelbuckner/Now-SC-Base-Prompts) repository.
 
 ## Development
 
-### Requirements
-- Node.js 14.x or higher
-- npm 6.x or higher
+### Build Commands
 
-### Dependencies
-- commander - CLI framework
-- chalk - Terminal styling
-- inquirer - Interactive prompts
-- axios - HTTP requests
-- dotenv - Environment variables
-- ora - Loading spinners
+```bash
+# Build for current platform
+make build
+
+# Build for all platforms
+make build-all
+
+# Clean build artifacts
+make clean
+
+# Install dependencies
+make deps
+
+# Run tests
+make test
+
+# Install to $GOPATH/bin
+make install
+```
+
+### Creating a Release
+
+1. Tag the commit:
+   ```bash
+   git tag v1.0.0
+   git push origin v1.0.0
+   ```
+
+2. GitHub Actions will automatically:
+   - Build binaries for all platforms
+   - Create checksums
+   - Create a GitHub release with all artifacts
+
+## Advantages Over Node.js Version
+
+The Go implementation provides:
+
+- Single binary distribution (no Node.js installation required)
+- Faster startup and execution
+- Smaller memory footprint
+- Native cross-compilation support
+- Easier deployment and distribution
 
 ## License
 
 MIT
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
